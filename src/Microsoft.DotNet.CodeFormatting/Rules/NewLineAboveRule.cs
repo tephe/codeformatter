@@ -101,7 +101,7 @@ namespace Microsoft.DotNet.CodeFormatting.Rules
             {
                 // There is no newline before the using at all.  Add a double newline to 
                 // get the blank we are looking for
-                newTriviaList = list.InsertRange(index + 1, new[] { newLineTrivia, newLineTrivia });
+                newTriviaList = list;
                 return true;
             }
 
