@@ -7,6 +7,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>CodeFormatter</RootNamespace>
     <AssemblyName>CodeFormatter</AssemblyName>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
   </PropertyGroup>
   <!-- Default configurations to help VS understand -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
@@ -122,4 +123,5 @@
     <Copy SourceFiles="$(ProjectDir)IllegalHeaders.md" DestinationFolder="$(OutputPath)" ContinueOnError="true" />
     <Copy SourceFiles="$(ProjectDir)CopyrightHeader.md" DestinationFolder="$(OutputPath)" ContinueOnError="true" />
   </Target>
+  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
 </Project>

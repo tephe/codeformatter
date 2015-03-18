@@ -95,15 +95,7 @@ namespace Microsoft.DotNet.CodeFormatting.Rules
 
                 if (fieldSymbol.IsStatic)
                 {
-                    // Check for ThreadStatic private fields.
-                    if (fieldSymbol.GetAttributes().Any(a => a.AttributeClass.Name.Equals("ThreadStaticAttribute", StringComparison.Ordinal)))
-                    {
-                        return "t_" + name;
-                    }
-                    else
-                    {
-                        return "s_" + name;
-                    }
+                    return char.ToUpper(name[0]) + name.Substring(1);
                 }
 
                 return "_" + name;
@@ -179,11 +171,11 @@ namespace Microsoft.DotNet.CodeFormatting.Rules
         {
             if (isInstance)
             {
-                return name.Length > 0 && name[0] == '_';
+                return name.Length > 0 && name[0] == '_';                 
             }
             else
             {
-                return name.Length > 1 && (name[0] == 's' || name[0] == 't') && name[1] == '_';
+                return name.Length > 0 && char.IsUpper(name[0]);
             }
         }
     }
