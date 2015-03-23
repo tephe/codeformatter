@@ -50,12 +50,13 @@ namespace Microsoft.DotNet.CodeFormatting.Rules
             public override SyntaxNode VisitFieldDeclaration(FieldDeclarationSyntax node)
             {
                 bool isInstance;
-                if (NeedsRewrite(node, out isInstance))
+                bool isReadOnly;
+                if (NeedsRewrite(node, out isInstance, out isReadOnly))
                 {
                     var list = new List<VariableDeclaratorSyntax>(node.Declaration.Variables.Count);
                     foreach (var v in node.Declaration.Variables)
                     {
-                        if (IsGoodPrivateFieldName(v.Identifier.Text, isInstance))
+                        if (IsGoodPrivateFieldName(v.Identifier.Text, isInstance, isReadOnly))
                         {
                             list.Add(v);
                         }
@@ -75,16 +76,16 @@ namespace Microsoft.DotNet.CodeFormatting.Rules
                 return node;
             }
 
-            private static bool NeedsRewrite(FieldDeclarationSyntax fieldSyntax, out bool isInstance)
+            private static bool NeedsRewrite(FieldDeclarationSyntax fieldSyntax, out bool isInstance, out bool isReadOnly)
             {
-                if (!IsPrivateField(fieldSyntax, out isInstance))
+                if (!IsPrivateField(fieldSyntax, out isInstance, out isReadOnly))
                 {
                     return false;
                 }
 
                 foreach (var v in fieldSyntax.Declaration.Variables)
                 {
-                    if (!IsGoodPrivateFieldName(v.Identifier.ValueText, isInstance))
+                    if (!IsGoodPrivateFieldName(v.Identifier.ValueText, isInstance, isReadOnly))
                     {
                         return true;
                     }
@@ -93,10 +94,11 @@ namespace Microsoft.DotNet.CodeFormatting.Rules
                 return false;
             }
 
-            private static bool IsPrivateField(FieldDeclarationSyntax fieldSyntax, out bool isInstance)
+            private static bool IsPrivateField(FieldDeclarationSyntax fieldSyntax, out bool isInstance, out bool isReadOnly)
             {
                 var isPrivate = true;
                 isInstance = true;
+                isReadOnly = false;
                 foreach (var modifier in fieldSyntax.Modifiers)
                 {
                     switch (modifier.Kind())
@@ -109,6 +111,9 @@ namespace Microsoft.DotNet.CodeFormatting.Rules
                             break;
                         case SyntaxKind.StaticKeyword:
                             isInstance = false;
+                            break;
+                        case SyntaxKind.ReadOnlyKeyword:
+                            isReadOnly = true;
                             break;
                     }
                 }

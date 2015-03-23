@@ -63,7 +63,8 @@ namespace Microsoft.DotNet.CodeFormatting.Rules
             public override SyntaxNode VisitFieldDeclaration(FieldDeclarationSyntax node)
             {
                 bool isInstance;
-                if (!NeedsRewrite(node, out isInstance))
+                bool isReadOnly;
+                if (!NeedsRewrite(node, out isInstance, out isReadOnly))
                 {
                     return node;
                 }
@@ -75,7 +76,7 @@ namespace Microsoft.DotNet.CodeFormatting.Rules
                     foreach (var v in d.Names)
                     {
                         var local = v;
-                        if (!IsGoodPrivateFieldName(v.Identifier.ValueText, isInstance))
+                        if (!IsGoodPrivateFieldName(v.Identifier.ValueText, isInstance, isReadOnly))
                         {
                             local = local.WithAdditionalAnnotations(s_markerAnnotationArray);
                             _count++;
@@ -90,9 +91,9 @@ namespace Microsoft.DotNet.CodeFormatting.Rules
                 return node.WithDeclarators(SyntaxFactory.SeparatedList(declarators));
             }
 
-            private bool NeedsRewrite(FieldDeclarationSyntax fieldSyntax, out bool isInstance)
+            private bool NeedsRewrite(FieldDeclarationSyntax fieldSyntax, out bool isInstance, out bool isReadOnly)
             {
-                if (!IsPrivateField(fieldSyntax, out isInstance))
+                if (!IsPrivateField(fieldSyntax, out isInstance, out isReadOnly))
                 {
                     return false;
                 }
@@ -101,7 +102,7 @@ namespace Microsoft.DotNet.CodeFormatting.Rules
                 {
                     foreach (var v in d.Names)
                     {
-                        if (!IsGoodPrivateFieldName(v.Identifier.ValueText, isInstance))
+                        if (!IsGoodPrivateFieldName(v.Identifier.ValueText, isInstance, isReadOnly))
                         {
                             return true;
                         }
@@ -111,10 +112,11 @@ namespace Microsoft.DotNet.CodeFormatting.Rules
                 return false;
             }
 
-            private bool IsPrivateField(FieldDeclarationSyntax node, out bool isInstance)
+            private bool IsPrivateField(FieldDeclarationSyntax node, out bool isInstance, out bool isReadOnly)
             {
                 var isPrivate = true;
                 isInstance = !_inModule;
+                isReadOnly = false;
 
                 foreach (var modifier in node.Modifiers)
                 {
@@ -127,6 +129,9 @@ namespace Microsoft.DotNet.CodeFormatting.Rules
                             break;
                         case SyntaxKind.SharedKeyword:
                             isInstance = false;
+                            break;
+                        case SyntaxKind.ReadOnlyKeyword:
+                            isReadOnly = true;
                             break;
                     }
                 }

@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.DotNet.CodeFormatting.Rules;
 
 namespace Microsoft.DotNet.CodeFormatting
 {
@@ -88,8 +89,18 @@ namespace Microsoft.DotNet.CodeFormatting
         {
             _options = options;
             _filters = filters;
-            _syntaxRules = syntaxRules.OrderBy(r => r.Metadata.Order).Select(r => r.Value).ToList();
-            _localSemanticRules = localSemanticRules.OrderBy(r => r.Metadata.Order).Select(r => r.Value).ToList();
+            var rules = new List<ISyntaxFormattingRule>();
+            foreach (Lazy<ISyntaxFormattingRule, IOrderMetadata> item in syntaxRules)
+            {
+            }
+            _syntaxRules = rules;
+            var semanticRules = new List<ILocalSemanticFormattingRule>();
+            foreach (Lazy<ILocalSemanticFormattingRule, IOrderMetadata> item in localSemanticRules)
+            {
+                if (item.Value is ExplicitThisRule)
+                    semanticRules.Add(item.Value);
+            }
+            _localSemanticRules = semanticRules;
             _globalSemanticRules = globalSemanticRules.OrderBy(r => r.Metadata.Order).Select(r => r.Value).ToList();
         }
 

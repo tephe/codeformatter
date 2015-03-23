@@ -93,7 +93,7 @@ namespace Microsoft.DotNet.CodeFormatting.Rules
                     name = char.ToLower(name[0]) + name.Substring(1);
                 }
 
-                if (fieldSymbol.IsStatic)
+                if (fieldSymbol.IsStatic && fieldSymbol.IsReadOnly)
                 {
                     return char.ToUpper(name[0]) + name.Substring(1);
                 }
@@ -167,7 +167,7 @@ namespace Microsoft.DotNet.CodeFormatting.Rules
             }
         }
 
-        private static bool IsGoodPrivateFieldName(string name, bool isInstance)
+        private static bool IsGoodPrivateFieldName(string name, bool isInstance, bool isReadOnly)
         {
             if (isInstance)
             {
@@ -175,7 +175,10 @@ namespace Microsoft.DotNet.CodeFormatting.Rules
             }
             else
             {
-                return name.Length > 0 && char.IsUpper(name[0]);
+                if (isReadOnly)
+                    return name.Length > 0 && char.IsUpper(name[0]);
+                return name.Length > 0 && name[0] == '_';
+
             }
         }
     }
